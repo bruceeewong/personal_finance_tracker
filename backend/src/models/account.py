@@ -36,4 +36,29 @@ class AccountBalanceHistory(db.Model):
     recorded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 def init_account_types():
-    pass
+    """Initialize default account types if they don't exist"""
+    default_types = [
+        {'name': 'Checking', 'description': 'Primary checking account for daily expenses'},
+        {'name': 'Savings', 'description': 'Savings account for storing money'},
+        {'name': 'Credit Card', 'description': 'Credit card account for credit transactions'},
+        {'name': 'Investment', 'description': 'Investment account for stocks, bonds, etc.'},
+        {'name': 'Retirement', 'description': '401k, IRA, and other retirement accounts'},
+        {'name': 'Cash', 'description': 'Cash on hand or petty cash'},
+        {'name': 'Loan', 'description': 'Personal loans, mortgages, auto loans'},
+        {'name': 'Crypto', 'description': 'Cryptocurrency wallets and exchanges'},
+    ]
+    
+    for account_type_data in default_types:
+        existing = AccountType.query.filter_by(name=account_type_data['name']).first()
+        if not existing:
+            account_type = AccountType(
+                name=account_type_data['name'],
+                description=account_type_data['description']
+            )
+            db.session.add(account_type)
+    
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error initializing account types: {e}")
