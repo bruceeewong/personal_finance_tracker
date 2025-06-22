@@ -1,0 +1,143 @@
+# Dependencies
+node_modules/
+venv/
+env/
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Testing
+.coverage
+.pytest_cache/
+coverage/
+*.cover
+.hypothesis/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Build output
+/frontend/dist
+/frontend/build
+/backend/instance/
+*.db
+
+# Misc
+.cache
+.temp
+.tmp
+.sass-cache
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+.env.development
+.env.production
+.env.test
+
+# Database
+*.sqlite
+*.sqlite3
+postgres_data/
+
+# Docker
+.dockerignore
+
+# JWT secrets and keys
+jwt_secret*
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+
+# Claude notes (optional - you may want to commit these)
+# claude-notes/
+
+# Local configuration
+config.local.*
+settings.local.*
+
+# Test output
+test-results/
+.nyc_output
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Runtime data
+pids/
+*.pid.lock
+
+# Optional npm cache
+.npm
+.eslintcache
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Backup files
+*.bak
+*.backup
+
+# Temporary files
+temp/
+tmp/
+*.tmp
