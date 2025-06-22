@@ -1,5 +1,15 @@
 # Next Tasks & Improvements
 
+## 🔄 IMPORTANT WORKFLOW RULE
+**When completing any feature/task, ALWAYS follow this 3-step process:**
+1. Cross out the completed item in this todo list (change [ ] to [x])
+2. Git commit with clear, descriptive message
+3. Submit a PR to origin with proper description
+
+## Completed Tasks ✅
+- [x] Update Dashboard to show real account balances instead of mock data (2025-06-22)
+- [x] Implement comprehensive TransactionsPage with full CRUD functionality (2025-06-22)
+
 ## Immediate Testing 🧪
 
 ### 1. Verify JWT Fix
