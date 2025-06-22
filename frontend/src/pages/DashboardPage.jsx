@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 import { 
   DollarSign, 
   CreditCard, 
@@ -14,34 +17,69 @@ import {
 
 const DashboardPage = () => {
   const { user } = useAuth();
+  const [accounts, setAccounts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data for demonstration
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/accounts');
+      setAccounts(response.data.accounts || []);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount, currency = 'USD') => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency
+    }).format(amount);
+  };
+
+  // Calculate real statistics from account data
+  const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
+  const checkingAccounts = accounts.filter(acc => acc.account_type_id === 1);
+  const savingsAccounts = accounts.filter(acc => acc.account_type_id === 2);
+  const investmentAccounts = accounts.filter(acc => acc.account_type_id === 4);
+  
+  const checkingBalance = checkingAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+  const savingsBalance = savingsAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+  const investmentBalance = investmentAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+
   const stats = [
     {
       title: 'Total Balance',
-      value: '$12,345.67',
-      change: '+2.5%',
+      value: formatCurrency(totalBalance),
+      change: '+0.0%',
       changeType: 'positive',
       icon: DollarSign,
     },
     {
-      title: 'Monthly Expenses',
-      value: '$2,847.32',
-      change: '-5.2%',
-      changeType: 'negative',
+      title: 'Checking Accounts',
+      value: formatCurrency(checkingBalance),
+      change: '+0.0%',
+      changeType: 'positive',
       icon: CreditCard,
     },
     {
       title: 'Investments',
-      value: '$8,921.45',
-      change: '+12.3%',
+      value: formatCurrency(investmentBalance),
+      change: '+0.0%',
       changeType: 'positive',
       icon: TrendingUp,
     },
     {
-      title: 'Savings Goals',
-      value: '$5,432.10',
-      change: '+8.7%',
+      title: 'Savings',
+      value: formatCurrency(savingsBalance),
+      change: '+0.0%',
       changeType: 'positive',
       icon: PiggyBank,
     },
@@ -55,8 +93,23 @@ const DashboardPage = () => {
     { id: 5, description: 'Online Purchase', amount: -129.99, date: '2025-06-18', category: 'Shopping' },
   ];
 
+  if (loading) {
+    return (
+      <div className="p-4 lg:p-8">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 lg:p-8 space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          {error}
+        </Alert>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -103,6 +156,37 @@ const DashboardPage = () => {
           );
         })}
       </div>
+
+      {/* Account Summary */}
+      {accounts.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Account Summary</CardTitle>
+            <CardDescription>
+              Overview of your active accounts
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {accounts.map((account) => (
+                <div key={account.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium">{account.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Type ID: {account.account_type_id} • {account.currency}
+                    </p>
+                  </div>
+                  <div className={`text-sm font-semibold ${
+                    account.balance >= 0 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {formatCurrency(account.balance, account.currency)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -214,4 +298,3 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
-
