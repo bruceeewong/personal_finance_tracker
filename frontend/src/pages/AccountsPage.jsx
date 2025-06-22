@@ -57,8 +57,8 @@ const AccountsPage = () => {
     try {
       setLoading(true);
       const [accountsResponse, typesResponse] = await Promise.all([
-        api.get('/api/accounts'),
-        api.get('/api/account-types')
+        api.get('/accounts'),
+        api.get('/account-types')
       ]);
       
       setAccounts(accountsResponse.data.accounts || []);
@@ -92,9 +92,9 @@ const AccountsPage = () => {
       };
 
       if (editingAccount) {
-        await api.put(`/api/accounts/${editingAccount.id}`, payload);
+        await api.put(`/accounts/${editingAccount.id}`, payload);
       } else {
-        await api.post('/api/accounts', payload);
+        await api.post('/accounts', payload);
       }
       
       resetForm();
@@ -119,7 +119,7 @@ const AccountsPage = () => {
     if (!confirm('Are you sure you want to delete this account?')) return;
     
     try {
-      await api.delete(`/api/accounts/${accountId}`);
+      await api.delete(`/accounts/${accountId}`);
       fetchData();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to delete account');
