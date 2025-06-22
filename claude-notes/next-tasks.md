@@ -1,17 +1,13 @@
 # Next Tasks & Improvements
 
-## Immediate Testing 🧪
+## 🔄 IMPORTANT WORKFLOW RULE
+**When completing any feature/task, ALWAYS follow this 3-step process:**
+1. Cross out the completed item in this todo list (change [ ] to [x])
+2. Git commit with clear, descriptive message
+3. Submit a PR to origin with proper description
 
-### 1. Verify JWT Fix
-- [ ] Test login functionality with new string-based JWT tokens
-- [ ] Verify `/auth/me` endpoint works correctly  
-- [ ] Confirm user remains logged in without redirect loops
-- [ ] Check that dashboard loads properly after login
-
-### 2. Review Log Output
-- [ ] Check `backend/logs/api.log` for clean request/response flow
-- [ ] Verify JWT operations show successful creation and validation
-- [ ] Ensure no error logs appear during normal authentication flow
+## Completed Tasks ✅
+- [x] Update Dashboard to show real account balances instead of mock data (2025-06-22)
 
 ## Pending Development Tasks 🔧
 
