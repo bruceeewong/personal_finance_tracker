@@ -91,36 +91,53 @@ const DropdownMenuContent = React.forwardRef(({
         }
       }}
       className={cn(
-        'absolute top-full mt-1 z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md',
+        'absolute top-full mt-1 z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white p-1 text-gray-900 shadow-lg',
         alignmentClasses[align],
         className
       )}
+      style={{ backgroundColor: 'white' }}
       {...props}
     >
-      {children}
+      {React.Children.map(children, child => {
+        if (React.isValidElement(child)) {
+          return React.cloneElement(child, { open, setOpen });
+        }
+        return child;
+      })}
     </div>
   );
 });
 DropdownMenuContent.displayName = 'DropdownMenuContent';
 
-const DropdownMenuItem = React.forwardRef(({ className, inset, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent hover:text-accent-foreground',
-      inset && 'pl-8',
-      className
-    )}
-    {...props}
-  />
-));
+const DropdownMenuItem = React.forwardRef(({ className, inset, onClick, open, setOpen, ...props }, ref) => {
+  const handleClick = (e) => {
+    if (onClick) {
+      onClick(e);
+    }
+    // Close dropdown after clicking item
+    setOpen?.(false);
+  };
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors text-gray-900 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900',
+        inset && 'pl-8',
+        className
+      )}
+      onClick={handleClick}
+      {...props}
+    />
+  );
+});
 DropdownMenuItem.displayName = 'DropdownMenuItem';
 
 const DropdownMenuLabel = React.forwardRef(({ className, inset, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      'px-2 py-1.5 text-sm font-semibold',
+      'px-2 py-1.5 text-sm font-semibold text-gray-900',
       inset && 'pl-8',
       className
     )}
@@ -132,7 +149,7 @@ DropdownMenuLabel.displayName = 'DropdownMenuLabel';
 const DropdownMenuSeparator = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('-mx-1 my-1 h-px bg-muted', className)}
+    className={cn('-mx-1 my-1 h-px bg-gray-200', className)}
     {...props}
   />
 ));
