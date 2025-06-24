@@ -144,48 +144,58 @@ const Layout = () => {
       <div className="flex">
         {/* Desktop Sidebar */}
         <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:bg-card">
-          <div className="flex flex-col flex-1 min-h-0">
-            <div className="flex items-center h-16 px-6 border-b">
+          <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="flex items-center h-16 px-6 border-b flex-shrink-0">
               <div className="flex items-center space-x-2">
                 <DollarSign className="h-6 w-6 text-primary" />
                 <span className="text-lg font-semibold">Personal Finance</span>
               </div>
             </div>
             
-            <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+            {/* Navigation - Scrollable middle section */}
+            <div className="flex-1 overflow-y-auto pt-5 pb-4">
               <div className="px-3">
                 <NavigationContent />
               </div>
             </div>
             
-            <div className="flex-shrink-0 border-t p-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="w-full justify-start">
-                    <Avatar className="h-6 w-6 mr-3">
-                      <AvatarFallback className="text-xs">{getUserInitials()}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm font-medium">
-                        {user?.first_name} {user?.last_name}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {user?.email}
-                      </span>
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuItem onClick={() => handleNavigation('/settings')}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            {/* User Profile - Always visible at bottom */}
+            <div className="flex-shrink-0 border-t p-4 space-y-3">
+              {/* User Info */}
+              <div className="flex items-center px-3">
+                <Avatar className="h-8 w-8 mr-3">
+                  <AvatarFallback className="text-xs">{getUserInitials()}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-sm font-medium truncate">
+                    {user?.first_name} {user?.last_name}
+                  </span>
+                  <span className="text-xs text-muted-foreground truncate">
+                    {user?.email}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="space-y-1">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start h-9"
+                  onClick={() => handleNavigation('/settings')}
+                >
+                  <User className="mr-3 h-4 w-4" />
+                  Profile
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start h-9 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="mr-3 h-4 w-4" />
+                  Log out
+                </Button>
+              </div>
             </div>
           </div>
         </aside>
