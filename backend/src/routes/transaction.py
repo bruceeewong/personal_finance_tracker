@@ -292,23 +292,35 @@ def get_transactions_summary():
     try:
         user_id = get_jwt_identity()
         
+        # Get month parameter from query string (format: YYYY-MM)
+        month_param = request.args.get('month')
+        if month_param:
+            try:
+                year, month = month_param.split('-')
+                target_year = int(year)
+                target_month = int(month)
+            except (ValueError, AttributeError):
+                return jsonify({'error': 'Invalid month format. Use YYYY-MM'}), 400
+        else:
+            # Default to current month
+            target_month = datetime.now().month
+            target_year = datetime.now().year
+        
         # Get monthly totals
         from sqlalchemy import func, extract
-        current_month = datetime.now().month
-        current_year = datetime.now().year
         
         monthly_income = db.session.query(func.sum(Transaction.amount)).filter(
             Transaction.user_id == user_id,
             Transaction.amount > 0,
-            extract('month', Transaction.transaction_date) == current_month,
-            extract('year', Transaction.transaction_date) == current_year
+            extract('month', Transaction.transaction_date) == target_month,
+            extract('year', Transaction.transaction_date) == target_year
         ).scalar() or 0
         
         monthly_expense = db.session.query(func.sum(Transaction.amount)).filter(
             Transaction.user_id == user_id,
             Transaction.amount < 0,
-            extract('month', Transaction.transaction_date) == current_month,
-            extract('year', Transaction.transaction_date) == current_year
+            extract('month', Transaction.transaction_date) == target_month,
+            extract('year', Transaction.transaction_date) == target_year
         ).scalar() or 0
         
         # Get recent transactions
@@ -333,8 +345,8 @@ def get_transactions_summary():
         return jsonify({
             'success': True,
             'summary': {
-                'monthly_income': float(monthly_income),
-                'monthly_expense': float(abs(monthly_expense)),
+                'total_income': float(monthly_income),
+                'total_expense': float(abs(monthly_expense)),
                 'net_income': float(monthly_income + monthly_expense),
                 'recent_transactions': recent_data
             }
