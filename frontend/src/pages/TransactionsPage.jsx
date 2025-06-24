@@ -87,9 +87,17 @@ const TransactionsPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Find the selected category to determine if it's income or expense
+      const selectedCategory = categories.find(c => c.id === parseInt(formData.category_id));
+      const isExpense = selectedCategory?.type === 'expense';
+      
+      // Convert amount to appropriate sign: negative for expenses, positive for income
+      const amount = parseFloat(formData.amount);
+      const finalAmount = isExpense ? -Math.abs(amount) : Math.abs(amount);
+      
       const payload = {
         ...formData,
-        amount: parseFloat(formData.amount),
+        amount: finalAmount,
         account_id: parseInt(formData.account_id),
         category_id: parseInt(formData.category_id)
       };
@@ -416,6 +424,9 @@ const TransactionsPage = () => {
                     placeholder="0.00"
                     required
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Enter positive amount (expenses will be automatically marked as negative)
+                  </p>
                 </div>
 
                 <div>

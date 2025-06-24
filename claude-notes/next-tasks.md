@@ -11,6 +11,8 @@
 - [x] Implement comprehensive TransactionsPage with full CRUD functionality (2025-06-22)
 - [x] Complete transaction feature implementation (backend + frontend) (2025-06-22)
 - [x] Implement transaction frontend with full CRUD, filtering, and monthly summaries (2025-06-24)
+- [x] Fix transaction summary API to show real data instead of zeros (2025-06-24)
+- [x] Fix transaction amount handling bug for expense categories (2025-06-24)
 
 ## Pending Development Tasks 🔧
 
