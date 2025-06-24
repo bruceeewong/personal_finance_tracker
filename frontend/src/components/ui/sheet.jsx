@@ -14,30 +14,43 @@ const Sheet = ({ children, open, onOpenChange }) => {
   );
 };
 
-const SheetTrigger = React.forwardRef(({ className, children, asChild = false, ...props }, ref) => {
-  const Component = asChild ? React.Fragment : 'button';
-  
+const SheetTrigger = React.forwardRef(({ className, children, asChild = false, open, onOpenChange, ...props }, ref) => {
+  const handleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onOpenChange?.(!open);
+  };
+
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children, {
       ...props,
       ref,
+      onClick: handleClick,
       className: cn(children.props.className, className)
     });
   }
   
   return (
-    <Component
+    <button
       ref={ref}
       className={className}
+      onClick={handleClick}
       {...props}
     >
       {children}
-    </Component>
+    </button>
   );
 });
 SheetTrigger.displayName = 'SheetTrigger';
 
-const SheetContent = React.forwardRef(({ side = 'right', className, children, open, onOpenChange, ...props }, ref) => {
+const SheetContent = React.forwardRef(({ 
+  side = 'right', 
+  className, 
+  children, 
+  open, 
+  onOpenChange, 
+  ...props 
+}, ref) => {
   React.useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape' && open) {
@@ -59,17 +72,17 @@ const SheetContent = React.forwardRef(({ side = 'right', className, children, op
   if (!open) return null;
 
   const sideVariants = {
-    top: 'inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
-    bottom: 'inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
-    left: 'inset-y-0 left-0 h-full border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
-    right: 'inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
+    top: 'inset-x-0 top-0 border-b translate-y-0',
+    bottom: 'inset-x-0 bottom-0 border-t translate-y-0', 
+    left: 'inset-y-0 left-0 h-full border-r translate-x-0',
+    right: 'inset-y-0 right-0 h-full border-l translate-x-0',
   };
 
   return (
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
         onClick={() => onOpenChange?.(false)}
       />
       
@@ -77,10 +90,11 @@ const SheetContent = React.forwardRef(({ side = 'right', className, children, op
       <div
         ref={ref}
         className={cn(
-          'fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+          'fixed z-50 bg-white border-r border-gray-200 shadow-xl transition-transform duration-300 ease-in-out',
           sideVariants[side],
           className
         )}
+        style={{ backgroundColor: 'white' }}
         {...props}
       >
         {children}

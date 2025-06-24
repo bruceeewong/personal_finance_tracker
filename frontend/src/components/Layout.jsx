@@ -25,6 +25,7 @@ import {
   User,
   DollarSign,
 } from 'lucide-react';
+import { getNavigationButtonClass, getUserInfoClasses, getContainerClass } from '../utils/styleUtils';
 
 const Layout = () => {
   const { user, logout } = useAuth();
@@ -58,7 +59,7 @@ const Layout = () => {
   };
 
   const NavigationContent = ({ isMobile = false }) => (
-    <nav className={`${isMobile ? 'flex flex-col space-y-2' : 'space-y-1'}`}>
+    <nav className={`${isMobile ? 'flex flex-col space-y-1' : 'space-y-1'}`}>
       {navigationItems.map((item) => {
         const Icon = item.icon;
         const isActive = location.pathname === item.path;
@@ -67,13 +68,11 @@ const Layout = () => {
           <Button
             key={item.path}
             variant={isActive ? 'default' : 'ghost'}
-            className={`${isMobile ? 'w-full justify-start' : 'w-full justify-start'} ${
-              isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
-            }`}
+            className={getNavigationButtonClass(isActive, isMobile)}
             onClick={() => handleNavigation(item.path)}
           >
             <Icon className="mr-3 h-4 w-4" />
-            {item.label}
+            <span>{item.label}</span>
           </Button>
         );
       })}
@@ -92,31 +91,31 @@ const Layout = () => {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-64">
-                <div className="flex flex-col h-full">
+              <SheetContent side="left" className="w-64 p-0">
+                <div className={getContainerClass('drawer', 'mobile')}>
                   {/* Header */}
-                  <div className="flex items-center space-x-2 mb-6 flex-shrink-0">
-                    <DollarSign className="h-6 w-6 text-primary" />
-                    <span className="text-lg font-semibold">Personal Finance</span>
+                  <div className={getContainerClass('header', 'mobile')}>
+                    <DollarSign className="h-6 w-6 text-blue-600" />
+                    <span className="text-lg font-semibold text-gray-900">Personal Finance</span>
                   </div>
                   
                   {/* Navigation - Scrollable middle section */}
-                  <div className="flex-1 overflow-y-auto">
+                  <div className={getContainerClass('navigation', 'mobile')}>
                     <NavigationContent isMobile={true} />
                   </div>
                   
                   {/* User Profile - Always visible at bottom */}
-                  <div className="flex-shrink-0 border-t pt-4 mt-4 space-y-3">
+                  <div className={getContainerClass('userSection', 'mobile')}>
                     {/* User Info */}
                     <div className="flex items-center px-3">
                       <Avatar className="h-8 w-8 mr-3">
-                        <AvatarFallback className="text-xs">{getUserInitials()}</AvatarFallback>
+                        <AvatarFallback className={getUserInfoClasses().avatar}>{getUserInitials()}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col min-w-0 flex-1">
-                        <span className="text-sm font-medium truncate">
+                        <span className={getUserInfoClasses().name}>
                           {user?.first_name} {user?.last_name}
                         </span>
-                        <span className="text-xs text-muted-foreground truncate">
+                        <span className={getUserInfoClasses().email}>
                           {user?.email}
                         </span>
                       </div>
@@ -126,7 +125,7 @@ const Layout = () => {
                     <div className="space-y-1">
                       <Button 
                         variant="ghost" 
-                        className="w-full justify-start h-9"
+                        className={`w-full justify-start h-9 ${getUserInfoClasses().profile}`}
                         onClick={() => handleNavigation('/settings')}
                       >
                         <User className="mr-3 h-4 w-4" />
@@ -134,7 +133,7 @@ const Layout = () => {
                       </Button>
                       <Button 
                         variant="ghost" 
-                        className="w-full justify-start h-9 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className={`w-full justify-start h-9 ${getUserInfoClasses().logout}`}
                         onClick={handleLogout}
                       >
                         <LogOut className="mr-3 h-4 w-4" />
