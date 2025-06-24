@@ -162,9 +162,18 @@ const TransactionsPage = () => {
   };
 
   const changeMonth = (direction) => {
-    const date = new Date(selectedMonth + '-01');
-    date.setMonth(date.getMonth() + direction);
-    setSelectedMonth(date.toISOString().slice(0, 7));
+    // Parse the current month (YYYY-MM format)
+    const [year, month] = selectedMonth.split('-').map(Number);
+    
+    // Create a new date with the first day of the month to avoid day overflow issues
+    const newDate = new Date(year, month - 1 + direction, 1);
+    
+    // Format back to YYYY-MM
+    const newYear = newDate.getFullYear();
+    const newMonth = newDate.getMonth() + 1;
+    const formattedMonth = `${newYear}-${newMonth.toString().padStart(2, '0')}`;
+    
+    setSelectedMonth(formattedMonth);
   };
 
   // Filter transactions

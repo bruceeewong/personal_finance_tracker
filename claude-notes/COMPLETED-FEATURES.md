@@ -28,6 +28,7 @@
 3. **Expense Amount Display**: Fixed positive/negative amount handling
 4. **Transaction Icons**: API missing category icon/type data
 5. **Layout Issues**: Improved transaction history display hierarchy
+6. **Month Navigation**: Fixed stuck navigation due to JavaScript date overflow
 
 ## 📊 Current Status
 - **Backend**: Fully functional with comprehensive API
