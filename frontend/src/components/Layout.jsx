@@ -94,11 +94,54 @@ const Layout = () => {
               </SheetTrigger>
               <SheetContent side="left" className="w-64">
                 <div className="flex flex-col h-full">
-                  <div className="flex items-center space-x-2 mb-6">
+                  {/* Header */}
+                  <div className="flex items-center space-x-2 mb-6 flex-shrink-0">
                     <DollarSign className="h-6 w-6 text-primary" />
                     <span className="text-lg font-semibold">Personal Finance</span>
                   </div>
-                  <NavigationContent isMobile={true} />
+                  
+                  {/* Navigation - Scrollable middle section */}
+                  <div className="flex-1 overflow-y-auto">
+                    <NavigationContent isMobile={true} />
+                  </div>
+                  
+                  {/* User Profile - Always visible at bottom */}
+                  <div className="flex-shrink-0 border-t pt-4 mt-4 space-y-3">
+                    {/* User Info */}
+                    <div className="flex items-center px-3">
+                      <Avatar className="h-8 w-8 mr-3">
+                        <AvatarFallback className="text-xs">{getUserInitials()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span className="text-sm font-medium truncate">
+                          {user?.first_name} {user?.last_name}
+                        </span>
+                        <span className="text-xs text-muted-foreground truncate">
+                          {user?.email}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="space-y-1">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start h-9"
+                        onClick={() => handleNavigation('/settings')}
+                      >
+                        <User className="mr-3 h-4 w-4" />
+                        Profile
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start h-9 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="mr-3 h-4 w-4" />
+                        Log out
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
