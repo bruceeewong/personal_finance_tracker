@@ -15,6 +15,7 @@
 - **Transaction Summaries**: Monthly income/expense/net calculations
 - **Recent Transactions**: Live transaction list with proper formatting
 - **Budget Overview**: Category-based spending visualization
+- **Month Navigation**: Switch between months to view historical data
 - **Quick Actions**: Navigation links to other pages
 
 ### API Enhancements
