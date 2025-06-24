@@ -154,7 +154,11 @@ const TransactionsPage = () => {
   };
 
   const getCategoryIcon = (category) => {
-    return category?.icon || (category?.type === 'income' ? '💰' : '💸');
+    // Use category's specific icon if available, otherwise use type-based icons
+    if (category?.icon) {
+      return category.icon;
+    }
+    return category?.type === 'income' ? '💰' : '💸';
   };
 
   const changeMonth = (direction) => {
@@ -489,15 +493,10 @@ const TransactionsPage = () => {
                     </div>
                     <div>
                       <div className="font-medium">
-                        {transaction.category?.name}
-                        {transaction.description && (
-                          <span className="text-muted-foreground ml-2">
-                            - {transaction.description}
-                          </span>
-                        )}
+                        {transaction.description || transaction.category?.name}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {transaction.account?.name} • {formatDate(transaction.transaction_date)}
+                        {transaction.category?.name} • {transaction.account?.name} • {formatDate(transaction.transaction_date)}
                       </div>
                     </div>
                   </div>
