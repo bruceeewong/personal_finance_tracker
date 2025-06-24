@@ -22,9 +22,17 @@ def get_transactions():
             transactions_data.append({
                 'id': transaction.id,
                 'account_id': transaction.account_id,
-                'account_name': account.name if account else 'Unknown',
+                'account': {
+                    'id': account.id if account else None,
+                    'name': account.name if account else 'Unknown'
+                },
                 'category_id': transaction.category_id,
-                'category_name': category.name if category else 'Uncategorized',
+                'category': {
+                    'id': category.id if category else None,
+                    'name': category.name if category else 'Uncategorized',
+                    'type': category.type if category else 'expense',
+                    'icon': category.icon if category else None
+                } if category else None,
                 'amount': transaction.amount,
                 'description': transaction.description,
                 'transaction_date': transaction.transaction_date.isoformat() if transaction.transaction_date else None,

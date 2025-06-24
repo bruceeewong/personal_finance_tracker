@@ -493,10 +493,17 @@ const TransactionsPage = () => {
                     </div>
                     <div>
                       <div className="font-medium">
-                        {transaction.description || transaction.category?.name}
+                        {transaction.category?.name}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {transaction.category?.name} • {transaction.account?.name} • {formatDate(transaction.transaction_date)}
+                        {transaction.description && (
+                          <div className="truncate max-w-xs mb-1">
+                            {transaction.description}
+                          </div>
+                        )}
+                        <div>
+                          {transaction.account?.name} • {formatDate(transaction.transaction_date)}
+                        </div>
                       </div>
                     </div>
                   </div>
