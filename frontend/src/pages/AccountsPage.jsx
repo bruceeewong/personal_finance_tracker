@@ -4,9 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert } from '@/components/ui/alert';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription 
+} from '@/components/ui/dialog';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { formatCurrency } from '../utils/currencyUtils';
 import { 
   Plus, 
   Edit, 
@@ -131,12 +139,6 @@ const AccountsPage = () => {
     return type?.name || 'Unknown';
   };
 
-  const formatCurrency = (amount, currency = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency
-    }).format(amount);
-  };
 
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
 
@@ -202,49 +204,50 @@ const AccountsPage = () => {
         </CardContent>
       </Card>
 
-      {/* Create/Edit Form */}
-      {showCreateForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
+      {/* Create/Edit Modal */}
+      <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
               {editingAccount ? 'Edit Account' : 'Create New Account'}
-            </CardTitle>
-            <CardDescription>
+            </DialogTitle>
+            <DialogDescription>
               {editingAccount ? 'Update account details' : 'Add a new financial account to track'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Account Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
-                    placeholder="e.g., Main Checking"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="account_type_id">Account Type</Label>
-                  <select
-                    id="account_type_id"
-                    value={formData.account_type_id}
-                    onChange={(e) => setFormData(prev => ({...prev, account_type_id: e.target.value}))}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    required
-                  >
-                    <option value="">Select account type...</option>
-                    {accountTypes.map(type => (
-                      <option key={type.id} value={type.id}>
-                        {type.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <Label htmlFor="name">Account Name</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
+                  placeholder="e.g., Main Checking"
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="account_type_id">Account Type</Label>
+                <select
+                  id="account_type_id"
+                  value={formData.account_type_id}
+                  onChange={(e) => setFormData(prev => ({...prev, account_type_id: e.target.value}))}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  required
+                >
+                  <option value="">Select account type...</option>
+                  {accountTypes.map(type => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="balance">Initial Balance</Label>
                   <Input
@@ -273,19 +276,19 @@ const AccountsPage = () => {
                   </select>
                 </div>
               </div>
+            </div>
 
-              <div className="flex gap-2">
-                <Button type="submit">
-                  {editingAccount ? 'Update Account' : 'Create Account'}
-                </Button>
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+            <div className="flex gap-2 pt-4">
+              <Button type="submit" className="flex-1">
+                {editingAccount ? 'Update Account' : 'Create Account'}
+              </Button>
+              <Button type="button" variant="outline" onClick={resetForm} className="flex-1">
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Accounts List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
