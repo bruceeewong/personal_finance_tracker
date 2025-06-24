@@ -30,6 +30,7 @@
 4. **Transaction Icons**: API missing category icon/type data
 5. **Layout Issues**: Improved transaction history display hierarchy
 6. **Month Navigation**: Fixed stuck navigation due to JavaScript date overflow
+7. **Future Month Prevention**: Disabled future month selection in both Dashboard and Transactions
 
 ## 📊 Current Status
 - **Backend**: Fully functional with comprehensive API

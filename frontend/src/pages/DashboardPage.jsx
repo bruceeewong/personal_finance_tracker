@@ -14,7 +14,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Plus,
-  Calendar
+  Calendar,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -24,6 +26,7 @@ const DashboardPage = () => {
   const [error, setError] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [monthlyData, setMonthlyData] = useState({
     income: 0,
     expenses: 0,
@@ -31,22 +34,24 @@ const DashboardPage = () => {
     previousMonthExpenses: 0
   });
 
-  const currentMonth = new Date().toISOString().slice(0, 7);
-  const previousMonth = new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().slice(0, 7);
-
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [selectedMonth]);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       
+      // Calculate previous month for comparison
+      const [year, month] = selectedMonth.split('-').map(Number);
+      const prevDate = new Date(year, month - 2, 1); // month - 2 because month is 1-indexed
+      const previousMonth = `${prevDate.getFullYear()}-${(prevDate.getMonth() + 1).toString().padStart(2, '0')}`;
+      
       // Fetch all data in parallel
       const [accountsRes, transactionsRes, currentMonthRes, previousMonthRes] = await Promise.all([
         api.get('/accounts'),
         api.get('/transactions'),
-        api.get(`/transactions/summary?month=${currentMonth}`),
+        api.get(`/transactions/summary?month=${selectedMonth}`),
         api.get(`/transactions/summary?month=${previousMonth}`)
       ]);
 
@@ -97,9 +102,25 @@ const DashboardPage = () => {
     .sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date))
     .slice(0, 5);
 
-  // Calculate budget data from transactions in current month
+  // Month navigation function
+  const changeMonth = (direction) => {
+    // Parse the current month (YYYY-MM format)
+    const [year, month] = selectedMonth.split('-').map(Number);
+    
+    // Create a new date with the first day of the month to avoid day overflow issues
+    const newDate = new Date(year, month - 1 + direction, 1);
+    
+    // Format back to YYYY-MM
+    const newYear = newDate.getFullYear();
+    const newMonth = newDate.getMonth() + 1;
+    const formattedMonth = `${newYear}-${newMonth.toString().padStart(2, '0')}`;
+    
+    setSelectedMonth(formattedMonth);
+  };
+
+  // Calculate budget data from transactions in selected month
   const currentMonthTransactions = transactions.filter(t => 
-    t.transaction_date.startsWith(currentMonth) && t.amount < 0
+    t.transaction_date.startsWith(selectedMonth) && t.amount < 0
   );
 
   const categorySpending = currentMonthTransactions.reduce((acc, transaction) => {
@@ -172,12 +193,37 @@ const DashboardPage = () => {
             Here's an overview of your financial status
           </p>
         </div>
-        <Link to="/transactions">
-          <Button className="sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Transaction
-          </Button>
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          {/* Month Switcher */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => changeMonth(-1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm font-medium min-w-[120px] text-center">
+              {new Date(selectedMonth + '-01').toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long' 
+              })}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => changeMonth(1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <Link to="/transactions">
+            <Button className="sm:w-auto">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Transaction
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Error Alert */}
@@ -311,7 +357,7 @@ const DashboardPage = () => {
             Monthly Budget Overview
           </CardTitle>
           <CardDescription>
-            Track your spending against your budget for {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            Track your spending against your budget for {new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </CardDescription>
         </CardHeader>
         <CardContent>
