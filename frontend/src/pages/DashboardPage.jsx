@@ -19,6 +19,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatMonthDisplay, navigateMonth, getCurrentMonth, isAtOrBeyondCurrentMonth } from '../utils/dateUtils';
 
 const DashboardPage = () => {
   const { user } = useAuth();
@@ -26,7 +27,7 @@ const DashboardPage = () => {
   const [error, setError] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const [monthlyData, setMonthlyData] = useState({
     income: 0,
     expenses: 0,
@@ -92,6 +93,7 @@ const DashboardPage = () => {
   // Calculate total balance from all accounts
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
 
+
   // Calculate expense change percentage
   const expenseChange = monthlyData.previousMonthExpenses > 0 
     ? ((monthlyData.expenses - monthlyData.previousMonthExpenses) / monthlyData.previousMonthExpenses * 100).toFixed(1)
@@ -104,18 +106,7 @@ const DashboardPage = () => {
 
   // Month navigation function
   const changeMonth = (direction) => {
-    // Parse the current month (YYYY-MM format)
-    const [year, month] = selectedMonth.split('-').map(Number);
-    
-    // Create a new date with the first day of the month to avoid day overflow issues
-    const newDate = new Date(year, month - 1 + direction, 1);
-    
-    // Format back to YYYY-MM
-    const newYear = newDate.getFullYear();
-    const newMonth = newDate.getMonth() + 1;
-    const formattedMonth = `${newYear}-${newMonth.toString().padStart(2, '0')}`;
-    
-    setSelectedMonth(formattedMonth);
+    setSelectedMonth(navigateMonth(selectedMonth, direction));
   };
 
   // Calculate budget data from transactions in selected month
@@ -204,15 +195,13 @@ const DashboardPage = () => {
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-sm font-medium min-w-[120px] text-center">
-              {new Date(selectedMonth + '-01').toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long' 
-              })}
+              {formatMonthDisplay(selectedMonth)}
             </span>
             <Button
               variant="outline"
               size="sm"
               onClick={() => changeMonth(1)}
+              disabled={isAtOrBeyondCurrentMonth(selectedMonth)}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -357,7 +346,7 @@ const DashboardPage = () => {
             Monthly Budget Overview
           </CardTitle>
           <CardDescription>
-            Track your spending against your budget for {new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            Track your spending against your budget for {formatMonthDisplay(selectedMonth, { month: 'long', year: 'numeric' })}
           </CardDescription>
         </CardHeader>
         <CardContent>

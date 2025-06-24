@@ -34,7 +34,24 @@
 - Maintain consistent error handling
 - Keep similar file structures across pages
 
-## Rule 3: Memory Management
+## Rule 3: Git Workflow
+
+**CRITICAL: Always check and add ALL modified files before committing**
+
+### Pre-commit Checklist:
+1. **Check all changes**: `git status` to see all modified files
+2. **Add frontend files**: Especially check `/frontend/src/` changes
+3. **Add backend files**: Check `/backend/src/` changes  
+4. **Add documentation**: Any `.md` files updated
+5. **Verify staging**: `git diff --staged` to confirm what's being committed
+
+### Common Missed Files:
+- Frontend React components (`/frontend/src/pages/`, `/frontend/src/components/`)
+- Utility functions (`/frontend/src/utils/`)
+- Backend routes and models (`/backend/src/`)
+- Configuration files
+
+## Rule 4: Memory Management
 
 - Always update `COMPLETED-FEATURES.md` after major changes
 - Create brief memory dumps for complex fixes

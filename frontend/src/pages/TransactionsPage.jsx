@@ -20,6 +20,7 @@ import {
   ChevronRight,
   X
 } from 'lucide-react';
+import { formatMonthDisplay, navigateMonth, getCurrentMonth, isAtOrBeyondCurrentMonth } from '../utils/dateUtils';
 
 const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
@@ -33,7 +34,7 @@ const TransactionsPage = () => {
   
   // Filter state
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedAccount, setSelectedAccount] = useState('');
   
@@ -162,18 +163,7 @@ const TransactionsPage = () => {
   };
 
   const changeMonth = (direction) => {
-    // Parse the current month (YYYY-MM format)
-    const [year, month] = selectedMonth.split('-').map(Number);
-    
-    // Create a new date with the first day of the month to avoid day overflow issues
-    const newDate = new Date(year, month - 1 + direction, 1);
-    
-    // Format back to YYYY-MM
-    const newYear = newDate.getFullYear();
-    const newMonth = newDate.getMonth() + 1;
-    const formattedMonth = `${newYear}-${newMonth.toString().padStart(2, '0')}`;
-    
-    setSelectedMonth(formattedMonth);
+    setSelectedMonth(navigateMonth(selectedMonth, direction));
   };
 
   // Filter transactions
@@ -287,15 +277,13 @@ const TransactionsPage = () => {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span className="text-sm font-medium">
-                {new Date(selectedMonth + '-01').toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'long' 
-                })}
+                {formatMonthDisplay(selectedMonth)}
               </span>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => changeMonth(1)}
+                disabled={isAtOrBeyondCurrentMonth(selectedMonth)}
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
