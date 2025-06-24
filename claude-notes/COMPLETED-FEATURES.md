@@ -31,6 +31,7 @@
 5. **Layout Issues**: Improved transaction history display hierarchy
 6. **Month Navigation**: Fixed stuck navigation due to JavaScript date overflow
 7. **Future Month Prevention**: Fixed logic to properly disable only future month navigation
+8. **Month Display**: Fixed timezone issue causing wrong month names (June showing as May)
 
 ## 📊 Current Status
 - **Backend**: Fully functional with comprehensive API
