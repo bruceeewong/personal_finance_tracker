@@ -45,3 +45,5 @@
 - **Error Handling**: Consistent patterns across frontend/backend
 - **UI Consistency**: Following established design patterns
 - **API Design**: RESTful with proper data structures
+- **Code Refactoring**: DRY principle - shared utilities for repeated patterns
+- **Date Utilities**: Common functions for month navigation and formatting
