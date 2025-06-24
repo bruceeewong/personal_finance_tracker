@@ -25,6 +25,12 @@
 
 ### API Development
 - [ ] Implement remaining CRUD operations for accounts, transactions, etc.
+- [ ] **Budget API Endpoints**
+  - [ ] Create budget tables (budgets, budget_categories, budget_goals)
+  - [ ] CRUD endpoints for budget management
+  - [ ] Budget category allocation endpoints
+  - [ ] Goal tracking and contribution endpoints
+  - [ ] Budget analytics and summary endpoints
 - [ ] Add input validation middleware
 - [ ] Implement proper error handling for all endpoints
 - [ ] Add API documentation (Swagger/OpenAPI)
@@ -32,6 +38,15 @@
 
 ### Frontend Development  
 - [ ] Complete all page implementations (currently showing placeholders)
+  - [ ] **BudgetsPage** - Implement comprehensive budget management
+    - [ ] Monthly category budgets with spending limits
+    - [ ] Goal-based budgets (travel, savings)
+    - [ ] Budget progress tracking and visualizations
+    - [ ] Budget templates and copying
+    - [ ] Alert configuration
+  - [ ] InvestmentsPage - Portfolio tracking
+  - [ ] GoalsPage - Financial goals management
+  - [ ] SettingsPage - User preferences
 - [ ] Add form validation for all user inputs
 - [ ] Implement proper error boundaries
 - [ ] Add loading states and skeletons
