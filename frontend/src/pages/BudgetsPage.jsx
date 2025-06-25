@@ -78,7 +78,11 @@ const BudgetsPage = () => {
       setCategories(categoriesRes.data.categories || []);
       setCurrentBudget(currentRes.data.budget);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load data');
+      if (err.response?.status === 401) {
+        setError('Session expired. Please log in again to view budgets.');
+      } else {
+        setError(err.response?.data?.error || 'Failed to load data');
+      }
     } finally {
       setLoading(false);
     }
@@ -143,10 +147,10 @@ const BudgetsPage = () => {
             alert_threshold_100: cat.alert_threshold_100
           }));
       } else if (formData.type === 'goal') {
-        // Add goal details
+        // Add goal details - target_amount should use the main amount field
         payload.goal = {
           goal_name: formData.goal.goal_name,
-          target_amount: parseFloat(formData.goal.target_amount),
+          target_amount: parseFloat(formData.amount), // Use main amount field for target
           target_date: formData.goal.target_date,
           auto_contribute_amount: formData.goal.auto_contribute_amount ? parseFloat(formData.goal.auto_contribute_amount) : null,
           auto_contribute_frequency: formData.goal.auto_contribute_frequency
@@ -162,7 +166,11 @@ const BudgetsPage = () => {
       resetForm();
       fetchData();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to save budget');
+      if (err.response?.status === 401) {
+        setError('Session expired. Please log in again.');
+      } else {
+        setError(err.response?.data?.error || 'Failed to save budget');
+      }
     }
   };
 
@@ -210,11 +218,12 @@ const BudgetsPage = () => {
       const goal = detailedBudget.goals[0];
       newFormData.goal = {
         goal_name: goal.goal_name,
-        target_amount: goal.target_amount.toString(),
         target_date: goal.target_date,
         auto_contribute_amount: goal.auto_contribute_amount?.toString() || '',
         auto_contribute_frequency: goal.auto_contribute_frequency || 'monthly'
       };
+      // For goal budgets, the target_amount is stored in the main amount field
+      newFormData.amount = goal.target_amount.toString();
     }
 
     setFormData(newFormData);
@@ -291,8 +300,12 @@ const BudgetsPage = () => {
       cat.type === 'expense' && !existingAllocations.some(alloc => alloc.category_id === cat.id)
     );
 
-    const handleSubmit = (e) => {
-      e.preventDefault();
+
+    const handleAddClick = () => {
+      // Validate required fields
+      if (!formData.category_id || !formData.allocated_amount) {
+        return; // Don't add if required fields are missing
+      }
       
       const selectedCategory = categories.find(cat => cat.id === parseInt(formData.category_id));
       const allocation = {
@@ -313,7 +326,7 @@ const BudgetsPage = () => {
 
     return (
       <Card className="p-4 border-dashed">
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="category">Category</Label>
@@ -370,12 +383,14 @@ const BudgetsPage = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button type="submit" size="sm">Add Allocation</Button>
+            <Button type="button" size="sm" onClick={handleAddClick}>
+              Add Allocation
+            </Button>
             <Button type="button" variant="outline" size="sm" onClick={onCancel}>
               Cancel
             </Button>
           </div>
-        </form>
+        </div>
       </Card>
     );
   };
@@ -526,7 +541,7 @@ const BudgetsPage = () => {
             variant="outline"
             size="sm"
             onClick={() => setShowAddForm(true)}
-            disabled={categories.length === allocations.length}
+            disabled={categories.filter(cat => cat.type === 'expense').length === allocations.length}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Allocation

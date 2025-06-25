@@ -19,7 +19,7 @@ from src.models.user import db, User, UserRelationship, UserSession
 from src.models.account import Account, AccountType, CryptoAccount, AccountBalanceHistory, init_account_types
 from src.models.transaction import Transaction, Category, TransactionSplit, Transfer, init_default_categories
 from src.models.investment import Investment, InvestmentType, InvestmentTransaction, PriceHistory, Dividend, init_investment_types
-from src.models.budget import Budget, BudgetCategory, FinancialGoal, GoalContribution
+from src.models.budget import Budget, BudgetCategory, BudgetGoal, FinancialGoal, GoalContribution
 
 # Import route blueprints
 from src.routes.auth import auth_bp
