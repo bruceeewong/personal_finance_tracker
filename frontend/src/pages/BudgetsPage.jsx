@@ -289,46 +289,55 @@ const BudgetsPage = () => {
   };
 
   // Allocation Management Components
-  const AddAllocationForm = ({ categories, existingAllocations, onAdd, onCancel, totalBudget }) => {
+  const AddAllocationForm = ({ categories, existingAllocations, onAdd, onUpdate, onCancel, totalBudget, editingAllocation = null }) => {
     const [formData, setFormData] = useState({
-      category_id: '',
-      allocated_amount: '',
-      allocation_type: 'fixed',
-      custom_name: '',
-      remarks: ''
+      category_id: editingAllocation?.category_id?.toString() || '',
+      allocated_amount: editingAllocation?.allocated_amount?.toString() || '',
+      allocation_type: editingAllocation?.allocation_type || 'fixed',
+      custom_name: editingAllocation?.custom_name || '',
+      remarks: editingAllocation?.remarks || ''
     });
 
     // Filter to expense categories only - allow duplicates for multiple allocations
     const availableCategories = categories.filter(cat => cat.type === 'expense');
 
 
-    const handleAddClick = () => {
+    const handleSubmitClick = () => {
       // Validate required fields
       if (!formData.category_id || !formData.allocated_amount) {
-        return; // Don't add if required fields are missing
+        return; // Don't submit if required fields are missing
       }
       
       const selectedCategory = categories.find(cat => cat.id === parseInt(formData.category_id));
       const allocation = {
-        id: Date.now(),
+        id: editingAllocation?.id || Date.now(),
         category_id: parseInt(formData.category_id),
         category_name: selectedCategory?.name,
         allocated_amount: parseFloat(formData.allocated_amount),
         allocation_type: formData.allocation_type,
         custom_name: formData.custom_name || selectedCategory?.name,
         remarks: formData.remarks,
-        alert_threshold_50: true,
-        alert_threshold_75: true,
-        alert_threshold_90: true,
-        alert_threshold_100: true
+        alert_threshold_50: editingAllocation?.alert_threshold_50 ?? true,
+        alert_threshold_75: editingAllocation?.alert_threshold_75 ?? true,
+        alert_threshold_90: editingAllocation?.alert_threshold_90 ?? true,
+        alert_threshold_100: editingAllocation?.alert_threshold_100 ?? true
       };
 
-      onAdd(allocation);
+      if (editingAllocation) {
+        onUpdate(allocation);
+      } else {
+        onAdd(allocation);
+      }
     };
 
     return (
       <Card className="p-4 border-dashed">
         <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">
+              {editingAllocation ? 'Edit Allocation' : 'Add New Allocation'}
+            </h3>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="category">Category</Label>
@@ -395,8 +404,8 @@ const BudgetsPage = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button type="button" size="sm" onClick={handleAddClick}>
-              Add Allocation
+            <Button type="button" size="sm" onClick={handleSubmitClick}>
+              {editingAllocation ? 'Update Allocation' : 'Add Allocation'}
             </Button>
             <Button type="button" variant="outline" size="sm" onClick={onCancel}>
               Cancel
@@ -407,7 +416,7 @@ const BudgetsPage = () => {
     );
   };
 
-  const AllocationList = ({ allocations, categories, onUpdate, totalBudget }) => {
+  const AllocationList = ({ allocations, categories, onUpdate, totalBudget, onEdit }) => {
     const handleRemove = (allocationId) => {
       onUpdate(allocations.filter(alloc => alloc.id !== allocationId));
     };
@@ -491,6 +500,15 @@ const BudgetsPage = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
+                    onClick={() => onEdit(allocation)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleRemove(allocation.id)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -561,10 +579,27 @@ const BudgetsPage = () => {
 
   const AllocationManager = ({ categories, allocations, onAllocationsChange, totalBudget }) => {
     const [showAddForm, setShowAddForm] = useState(false);
+    const [editingAllocation, setEditingAllocation] = useState(null);
 
     const handleAddAllocation = (newAllocation) => {
       onAllocationsChange([...allocations, newAllocation]);
       setShowAddForm(false);
+    };
+
+    const handleUpdateAllocation = (updatedAllocation) => {
+      onAllocationsChange(allocations.map(alloc => 
+        alloc.id === updatedAllocation.id ? updatedAllocation : alloc
+      ));
+      setEditingAllocation(null);
+    };
+
+    const handleEditAllocation = (allocation) => {
+      setEditingAllocation(allocation);
+      setShowAddForm(false); // Hide add form if it's open
+    };
+
+    const handleCancelEdit = () => {
+      setEditingAllocation(null);
     };
 
     return (
@@ -587,6 +622,7 @@ const BudgetsPage = () => {
           categories={categories}
           onUpdate={onAllocationsChange}
           totalBudget={totalBudget}
+          onEdit={handleEditAllocation}
         />
 
         {showAddForm && (
@@ -596,6 +632,17 @@ const BudgetsPage = () => {
             totalBudget={totalBudget}
             onAdd={handleAddAllocation}
             onCancel={() => setShowAddForm(false)}
+          />
+        )}
+
+        {editingAllocation && (
+          <AddAllocationForm
+            categories={categories}
+            existingAllocations={allocations}
+            totalBudget={totalBudget}
+            editingAllocation={editingAllocation}
+            onUpdate={handleUpdateAllocation}
+            onCancel={handleCancelEdit}
           />
         )}
 
