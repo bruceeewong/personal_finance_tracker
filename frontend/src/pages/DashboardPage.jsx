@@ -5,6 +5,7 @@ import { Alert } from '@/components/ui/alert';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { formatCurrency } from '../utils/currencyUtils';
 import { 
   DollarSign, 
   CreditCard, 
@@ -27,6 +28,7 @@ const DashboardPage = () => {
   const [error, setError] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [currentBudget, setCurrentBudget] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const [monthlyData, setMonthlyData] = useState({
     income: 0,
@@ -49,15 +51,17 @@ const DashboardPage = () => {
       const previousMonth = `${prevDate.getFullYear()}-${(prevDate.getMonth() + 1).toString().padStart(2, '0')}`;
       
       // Fetch all data in parallel
-      const [accountsRes, transactionsRes, currentMonthRes, previousMonthRes] = await Promise.all([
+      const [accountsRes, transactionsRes, currentMonthRes, previousMonthRes, budgetRes] = await Promise.all([
         api.get('/accounts'),
         api.get('/transactions'),
         api.get(`/transactions/summary?month=${selectedMonth}`),
-        api.get(`/transactions/summary?month=${previousMonth}`)
+        api.get(`/transactions/summary?month=${previousMonth}`),
+        api.get('/budgets/current').catch(() => ({ data: { budget: null } })) // Don't fail if no budget
       ]);
 
       setAccounts(accountsRes.data.accounts || []);
       setTransactions(transactionsRes.data.transactions || []);
+      setCurrentBudget(budgetRes.data.budget);
       
       const currentSummary = currentMonthRes.data.summary || { total_income: 0, total_expense: 0 };
       const previousSummary = previousMonthRes.data.summary || { total_income: 0, total_expense: 0 };
@@ -75,12 +79,6 @@ const DashboardPage = () => {
     }
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -109,29 +107,26 @@ const DashboardPage = () => {
     setSelectedMonth(navigateMonth(selectedMonth, direction));
   };
 
-  // Calculate budget data from transactions in selected month
-  const currentMonthTransactions = transactions.filter(t => 
-    t.transaction_date.startsWith(selectedMonth) && t.amount < 0
-  );
-
-  const categorySpending = currentMonthTransactions.reduce((acc, transaction) => {
-    const categoryName = transaction.category?.name || 'Other';
-    if (!acc[categoryName]) {
-      acc[categoryName] = 0;
+  // Get real budget data with spending calculations
+  const getBudgetData = () => {
+    if (!currentBudget || !currentBudget.categories) {
+      return [];
     }
-    acc[categoryName] += Math.abs(transaction.amount);
-    return acc;
-  }, {});
 
-  // Mock budget amounts (in a real app, these would come from user settings)
-  const budgetData = Object.keys(categorySpending).slice(0, 4).map(category => ({
-    category,
-    spent: categorySpending[category],
-    budget: Math.ceil(categorySpending[category] * 1.2), // Mock: 20% higher than spent
-    color: ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'][
-      Object.keys(categorySpending).indexOf(category) % 4
-    ]
-  }));
+    const colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-purple-500', 'bg-pink-500'];
+    
+    return currentBudget.categories.map((budgetCategory, index) => ({
+      category: budgetCategory.category?.name || 'Unknown',
+      spent: budgetCategory.spent_amount || 0,
+      budget: budgetCategory.allocated_amount || 0,
+      remaining: budgetCategory.remaining_amount || 0,
+      percentage: budgetCategory.percentage_used || 0,
+      color: colors[index % colors.length],
+      isOverBudget: (budgetCategory.spent_amount || 0) > (budgetCategory.allocated_amount || 0)
+    }));
+  };
+
+  const budgetData = getBudgetData();
 
   if (loading) {
     return (
