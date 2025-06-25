@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert } from '@/components/ui/alert';
+import CategorySelector from '@/components/ui/category-selector';
 import api from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { 
@@ -302,27 +303,13 @@ const TransactionsPage = () => {
               />
             </div>
             
-            <select
+            <CategorySelector
+              categories={categories}
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="">All Categories</option>
-              <optgroup label="Income">
-                {categories.filter(c => c.type === 'income').map(category => (
-                  <option key={category.id} value={category.id}>
-                    {getCategoryIcon(category)} {category.name}
-                  </option>
-                ))}
-              </optgroup>
-              <optgroup label="Expenses">
-                {categories.filter(c => c.type === 'expense').map(category => (
-                  <option key={category.id} value={category.id}>
-                    {getCategoryIcon(category)} {category.name}
-                  </option>
-                ))}
-              </optgroup>
-            </select>
+              onChange={setSelectedCategory}
+              placeholder="All Categories"
+              showIcons={true}
+            />
 
             <select
               value={selectedAccount}
@@ -388,29 +375,15 @@ const TransactionsPage = () => {
                 
                 <div>
                   <Label htmlFor="category_id">Category</Label>
-                  <select
+                  <CategorySelector
                     id="category_id"
+                    categories={categories}
                     value={formData.category_id}
-                    onChange={(e) => setFormData(prev => ({...prev, category_id: e.target.value}))}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    onChange={(value) => setFormData(prev => ({...prev, category_id: value}))}
+                    placeholder="Select category..."
+                    showIcons={true}
                     required
-                  >
-                    <option value="">Select category...</option>
-                    <optgroup label="Income">
-                      {categories.filter(c => c.type === 'income').map(category => (
-                        <option key={category.id} value={category.id}>
-                          {getCategoryIcon(category)} {category.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Expenses">
-                      {categories.filter(c => c.type === 'expense').map(category => (
-                        <option key={category.id} value={category.id}>
-                          {getCategoryIcon(category)} {category.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  </select>
+                  />
                 </div>
 
                 <div>

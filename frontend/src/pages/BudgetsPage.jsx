@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import CategorySelector from '@/components/ui/category-selector';
 import api from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { formatCurrency } from '../utils/currencyUtils';
@@ -285,8 +286,9 @@ const BudgetsPage = () => {
       custom_name: ''
     });
 
+    // Filter to expense categories only and exclude already allocated ones
     const availableCategories = categories.filter(cat => 
-      !existingAllocations.some(alloc => alloc.category_id === cat.id)
+      cat.type === 'expense' && !existingAllocations.some(alloc => alloc.category_id === cat.id)
     );
 
     const handleSubmit = (e) => {
@@ -315,20 +317,15 @@ const BudgetsPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="category">Category</Label>
-              <select
+              <CategorySelector
                 id="category"
+                categories={availableCategories}
                 value={formData.category_id}
-                onChange={(e) => setFormData(prev => ({...prev, category_id: e.target.value}))}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onChange={(value) => setFormData(prev => ({...prev, category_id: value}))}
+                filterType="expense"
+                placeholder="Select expense category..."
                 required
-              >
-                <option value="">Select category...</option>
-                {availableCategories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name} ({category.type})
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div>
