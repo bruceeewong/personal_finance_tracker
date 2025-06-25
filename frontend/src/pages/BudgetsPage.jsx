@@ -298,10 +298,8 @@ const BudgetsPage = () => {
       remarks: ''
     });
 
-    // Filter to expense categories only and exclude already allocated ones
-    const availableCategories = categories.filter(cat => 
-      cat.type === 'expense' && !existingAllocations.some(alloc => alloc.category_id === cat.id)
-    );
+    // Filter to expense categories only - allow duplicates for multiple allocations
+    const availableCategories = categories.filter(cat => cat.type === 'expense');
 
 
     const handleAddClick = () => {
@@ -346,12 +344,12 @@ const BudgetsPage = () => {
             </div>
 
             <div>
-              <Label htmlFor="custom_name">Custom Name (optional)</Label>
+              <Label htmlFor="custom_name">Custom Name (recommended)</Label>
               <Input
                 id="custom_name"
                 value={formData.custom_name}
                 onChange={(e) => setFormData(prev => ({...prev, custom_name: e.target.value}))}
-                placeholder="e.g., Emergency Buffer, Fun Money"
+                placeholder="e.g., Flight to NYC, Hotel Stay, Emergency Buffer"
               />
             </div>
 
@@ -392,7 +390,7 @@ const BudgetsPage = () => {
               id="remarks"
               value={formData.remarks}
               onChange={(e) => setFormData(prev => ({...prev, remarks: e.target.value}))}
-              placeholder="e.g., Flight link, booking details, explanation..."
+              placeholder="e.g., Flight DL123 confirmation, Hotel booking ref ABC123..."
             />
           </div>
 
@@ -507,7 +505,7 @@ const BudgetsPage = () => {
                     type="text"
                     value={allocation.remarks || ''}
                     onChange={(e) => handleRemarksChange(allocation.id, e.target.value)}
-                    placeholder="Add remarks (flight link, booking details, etc.)"
+                    placeholder="Add remarks (flight confirmation, booking details, etc.)"
                     className="text-sm"
                   />
                 </div>
@@ -578,7 +576,6 @@ const BudgetsPage = () => {
             variant="outline"
             size="sm"
             onClick={() => setShowAddForm(true)}
-            disabled={categories.filter(cat => cat.type === 'expense').length === allocations.length}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Allocation
