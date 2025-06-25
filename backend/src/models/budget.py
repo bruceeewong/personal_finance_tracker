@@ -44,6 +44,7 @@ class BudgetCategory(db.Model):
     budget_id = db.Column(db.Integer, db.ForeignKey('budgets.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
     allocated_amount = db.Column(db.Float, nullable=False)
+    remarks = db.Column(db.Text, nullable=True)
     alert_threshold_50 = db.Column(db.Boolean, default=True)
     alert_threshold_75 = db.Column(db.Boolean, default=True)
     alert_threshold_90 = db.Column(db.Boolean, default=True)
@@ -60,6 +61,7 @@ class BudgetCategory(db.Model):
             'budget_id': self.budget_id,
             'category_id': self.category_id,
             'allocated_amount': float(self.allocated_amount),
+            'remarks': self.remarks,
             'alert_threshold_50': self.alert_threshold_50,
             'alert_threshold_75': self.alert_threshold_75,
             'alert_threshold_90': self.alert_threshold_90,

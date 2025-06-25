@@ -141,6 +141,7 @@ const BudgetsPage = () => {
             allocated_amount: cat.allocation_type === 'percentage' 
               ? (parseFloat(formData.amount) * cat.allocated_amount / 100)
               : cat.allocated_amount,
+            remarks: cat.remarks || null,
             alert_threshold_50: cat.alert_threshold_50,
             alert_threshold_75: cat.alert_threshold_75,
             alert_threshold_90: cat.alert_threshold_90,
@@ -208,6 +209,7 @@ const BudgetsPage = () => {
             allocated_amount: budgetCat.allocated_amount,
             allocation_type: 'fixed', // Default to fixed for existing allocations
             custom_name: category?.name || 'Unknown',
+            remarks: budgetCat.remarks || '',
             alert_threshold_50: budgetCat.alert_threshold_50 !== false,
             alert_threshold_75: budgetCat.alert_threshold_75 !== false,
             alert_threshold_90: budgetCat.alert_threshold_90 !== false,
@@ -292,7 +294,8 @@ const BudgetsPage = () => {
       category_id: '',
       allocated_amount: '',
       allocation_type: 'fixed',
-      custom_name: ''
+      custom_name: '',
+      remarks: ''
     });
 
     // Filter to expense categories only and exclude already allocated ones
@@ -315,6 +318,7 @@ const BudgetsPage = () => {
         allocated_amount: parseFloat(formData.allocated_amount),
         allocation_type: formData.allocation_type,
         custom_name: formData.custom_name || selectedCategory?.name,
+        remarks: formData.remarks,
         alert_threshold_50: true,
         alert_threshold_75: true,
         alert_threshold_90: true,
@@ -382,6 +386,16 @@ const BudgetsPage = () => {
             </div>
           </div>
 
+          <div>
+            <Label htmlFor="remarks">Remarks (optional)</Label>
+            <Input
+              id="remarks"
+              value={formData.remarks}
+              onChange={(e) => setFormData(prev => ({...prev, remarks: e.target.value}))}
+              placeholder="e.g., Flight link, booking details, explanation..."
+            />
+          </div>
+
           <div className="flex gap-2">
             <Button type="button" size="sm" onClick={handleAddClick}>
               Add Allocation
@@ -416,6 +430,14 @@ const BudgetsPage = () => {
       ));
     };
 
+    const handleRemarksChange = (allocationId, newRemarks) => {
+      onUpdate(allocations.map(alloc => 
+        alloc.id === allocationId 
+          ? { ...alloc, remarks: newRemarks }
+          : alloc
+      ));
+    };
+
     if (allocations.length === 0) {
       return (
         <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
@@ -434,47 +456,62 @@ const BudgetsPage = () => {
             : allocation.allocated_amount;
 
           return (
-            <div key={allocation.id} className="flex items-center gap-3 p-3 border rounded-lg bg-card">
-              <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <div key={allocation.id} className="border rounded-lg bg-card">
+              <div className="flex items-center gap-3 p-3">
+                <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">{allocation.custom_name || allocation.category_name}</div>
+                  {allocation.allocation_type === 'percentage' && (
+                    <div className="text-sm text-muted-foreground">
+                      {allocation.allocated_amount}% = {formatCurrency(calculatedAmount)}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <select
+                    value={allocation.allocation_type}
+                    onChange={(e) => handleTypeChange(allocation.id, e.target.value)}
+                    className="text-xs border rounded px-2 py-1"
+                  >
+                    <option value="fixed">$</option>
+                    <option value="percentage">%</option>
+                  </select>
+
+                  <Input
+                    type="number"
+                    step={allocation.allocation_type === 'percentage' ? '0.1' : '0.01'}
+                    min="0"
+                    max={allocation.allocation_type === 'percentage' ? '100' : undefined}
+                    value={allocation.allocated_amount}
+                    onChange={(e) => handleAmountChange(allocation.id, e.target.value)}
+                    className="w-20 text-right"
+                  />
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemove(allocation.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
               
-              <div className="flex-1 min-w-0">
-                <div className="font-medium truncate">{allocation.custom_name || allocation.category_name}</div>
-                {allocation.allocation_type === 'percentage' && (
-                  <div className="text-sm text-muted-foreground">
-                    {allocation.allocated_amount}% = {formatCurrency(calculatedAmount)}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <select
-                  value={allocation.allocation_type}
-                  onChange={(e) => handleTypeChange(allocation.id, e.target.value)}
-                  className="text-xs border rounded px-2 py-1"
-                >
-                  <option value="fixed">$</option>
-                  <option value="percentage">%</option>
-                </select>
-
-                <Input
-                  type="number"
-                  step={allocation.allocation_type === 'percentage' ? '0.1' : '0.01'}
-                  min="0"
-                  max={allocation.allocation_type === 'percentage' ? '100' : undefined}
-                  value={allocation.allocated_amount}
-                  onChange={(e) => handleAmountChange(allocation.id, e.target.value)}
-                  className="w-20 text-right"
-                />
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemove(allocation.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+              {/* Remarks section */}
+              {(allocation.remarks || allocation.id) && (
+                <div className="px-3 pb-3">
+                  <Input
+                    type="text"
+                    value={allocation.remarks || ''}
+                    onChange={(e) => handleRemarksChange(allocation.id, e.target.value)}
+                    placeholder="Add remarks (flight link, booking details, etc.)"
+                    className="text-sm"
+                  />
+                </div>
+              )}
             </div>
           );
         })}
