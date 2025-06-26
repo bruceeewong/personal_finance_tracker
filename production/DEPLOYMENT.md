@@ -18,7 +18,7 @@ This guide provides instructions for deploying the Personal Finance application 
 
 2. **Create environment file**
    ```bash
-   cp .env.example .env
+   cp production/.env.example .env
    ```
 
 3. **Configure environment variables**
@@ -30,11 +30,13 @@ This guide provides instructions for deploying the Personal Finance application 
 
 4. **Build and start services**
    ```bash
+   cd production
    docker-compose -f docker-compose.prod.yml up -d --build
    ```
 
 5. **Run database migrations**
    ```bash
+   cd production
    docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
    ```
 
@@ -101,23 +103,77 @@ docker-compose -f docker-compose.prod.yml logs -f backend
 
 ## Backup and Restore
 
-### Database Backup
+### Database Persistence
+✅ **Database data persists** through container restarts, updates, and system reboots  
+✅ **Stored in Docker volume**: `postgres_data` (survives `docker-compose down`)  
+❌ **Data lost only if**: You explicitly delete the volume  
 
+### Automated Backup
+
+Use the provided backup script (run from project root):
 ```bash
 # Create backup
-docker-compose -f docker-compose.prod.yml exec db pg_dump -U postgres personal_finance > backup.sql
+./production/scripts/backup-db.sh
 
-# Restore backup
-docker-compose -f docker-compose.prod.yml exec -T db psql -U postgres personal_finance < backup.sql
+# Create backup in specific directory
+./production/scripts/backup-db.sh /path/to/backups
+```
+
+### Manual Database Backup
+
+```bash
+# Create timestamped backup
+docker-compose -f docker-compose.prod.yml exec db pg_dump -U postgres personal_finance > backup-$(date +%Y%m%d-%H%M%S).sql
+
+# Compressed backup
+docker-compose -f docker-compose.prod.yml exec db pg_dump -U postgres personal_finance | gzip > backup-$(date +%Y%m%d-%H%M%S).sql.gz
+```
+
+### Database Restore
+
+```bash
+# Using restore script (run from project root)
+./production/scripts/restore-db.sh ./production/backups/backup-20250626-120000.sql.gz
+
+# Manual restore (run from production folder)
+cd production
+docker-compose -f docker-compose.prod.yml exec -T db psql -U postgres personal_finance < ../backup.sql
+```
+
+### Automated Backups (Production)
+
+Add to crontab for daily backups:
+```bash
+# Edit crontab
+crontab -e
+
+# Add daily backup at 2 AM
+0 2 * * * cd /path/to/your/app && ./production/scripts/backup-db.sh /backups/daily
+```
+
+### Volume Management
+
+```bash
+# List all volumes
+docker volume ls
+
+# Inspect volume details
+docker volume inspect personal_finance_postgres_data
+
+# Manual volume backup
+docker run --rm -v personal_finance_postgres_data:/data -v $(pwd):/backup alpine tar czf /backup/postgres_volume_backup.tar.gz /data
 ```
 
 ### Redis Backup
 
-Redis data is persisted in the `redis_data` volume. Backup the volume directory or use Redis commands:
+Redis data is persisted in the `redis_data` volume:
 
 ```bash
 # Save Redis data
 docker-compose -f docker-compose.prod.yml exec redis redis-cli --pass $REDIS_PASSWORD BGSAVE
+
+# Manual Redis backup
+docker-compose -f docker-compose.prod.yml exec redis redis-cli --pass $REDIS_PASSWORD --rdb /data/dump.rdb
 ```
 
 ## Scaling

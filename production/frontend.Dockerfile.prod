@@ -10,8 +10,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies with exact versions
-RUN npm ci --only=production
+# Install dependencies (including dev dependencies needed for build)
+RUN npm ci
 
 # Copy application code
 COPY . .
@@ -25,9 +25,7 @@ FROM nginx:alpine
 # Install security updates
 RUN apk update && apk upgrade && rm -rf /var/cache/apk/*
 
-# Create non-root user
-RUN addgroup -g 101 -S nginx && \
-    adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx
+# Use existing nginx user (already exists in nginx:alpine)
 
 # Copy built assets from build stage
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -45,7 +43,7 @@ RUN echo 'add_header X-Frame-Options "SAMEORIGIN" always;' >> /etc/nginx/conf.d/
     echo 'add_header X-Content-Type-Options "nosniff" always;' >> /etc/nginx/conf.d/security.conf && \
     echo 'add_header X-XSS-Protection "1; mode=block" always;' >> /etc/nginx/conf.d/security.conf && \
     echo 'add_header Referrer-Policy "strict-origin-when-cross-origin" always;' >> /etc/nginx/conf.d/security.conf && \
-    echo 'add_header Content-Security-Policy "default-src '\''self'\''; script-src '\''self'\'' '\''unsafe-inline'\'' '\''unsafe-eval'\''; style-src '\''self'\'' '\''unsafe-inline'\''; img-src '\''self'\'' data: https:; font-src '\''self'\''; connect-src '\''self'\'' ${VITE_API_URL};" always;' >> /etc/nginx/conf.d/security.conf
+    echo 'add_header Content-Security-Policy "default-src '\''self'\''; script-src '\''self'\'' '\''unsafe-inline'\'' '\''unsafe-eval'\''; style-src '\''self'\'' '\''unsafe-inline'\''; img-src '\''self'\'' data: https:; font-src '\''self'\''; connect-src '\''self'\'' '\''*'\'';" always;' >> /etc/nginx/conf.d/security.conf
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /docker-entrypoint.sh

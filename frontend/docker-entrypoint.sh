@@ -1,11 +1,8 @@
 #!/bin/sh
 set -e
 
-# Replace PORT placeholder in nginx config with actual port
-if [ -n "$PORT" ]; then
-    echo "Configuring nginx to listen on port $PORT"
-    sed -i "s/listen 80;/listen $PORT;/g" /etc/nginx/conf.d/default.conf
-fi
+# No need to modify nginx config in production - using default port 80
+echo "Starting nginx on port 80"
 
 # Execute the original nginx command
 exec "$@"
