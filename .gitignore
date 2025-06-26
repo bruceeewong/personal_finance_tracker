@@ -142,3 +142,6 @@ temp/
 tmp/
 *.tmp.env.local
 .env.production
+
+# Production
+production/import_csv/**/*.csv
