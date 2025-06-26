@@ -3,10 +3,15 @@ import sys
 # DON'T CHANGE THIS !!!
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
+from dotenv import load_dotenv
+# Load environment variables from .env file
+load_dotenv()
+
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from datetime import timedelta
+from datetime import timedelta, datetime
+from sqlalchemy import text
 
 # Import logging utilities
 from src.utils.logger import (
@@ -34,24 +39,37 @@ setup_logger()
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 
-# Configuration
-app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
-app.config['JWT_SECRET_KEY'] = 'jwt-secret-string-change-in-production'
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
-app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+# Configuration from environment variables
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'jwt-secret-string-change-in-production')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(seconds=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', '3600')))
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(seconds=int(os.getenv('JWT_REFRESH_TOKEN_EXPIRES', '2592000')))
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
+default_db_path = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', default_db_path)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize extensions
 db.init_app(app)
 jwt = JWTManager(app)
-CORS(app, 
-     origins=["http://localhost:3000", "http://100.97.49.122:3000"], 
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+# CORS Configuration
+if os.getenv('FLASK_ENV') == 'development':
+    # For development, allow any origin on ports 3000 and 5100
+    CORS(app, 
+         origins="*",  # Allow all origins in development
+         supports_credentials=True,
+         allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+else:
+    # For production, use specific origins
+    cors_origins_str = os.getenv('CORS_ORIGINS', 'http://localhost:3000')
+    cors_origins = [origin.strip() for origin in cors_origins_str.split(',')]
+    CORS(app, 
+         origins=cors_origins, 
+         supports_credentials=True,
+         allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 # Register blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
@@ -118,7 +136,30 @@ def serve(path):
 
 @app.route('/api/health')
 def health_check():
-    return {'status': 'healthy', 'message': 'Personal Finance API is running'}
+    """Health check endpoint that verifies API and database connectivity"""
+    health_status = {
+        'status': 'healthy',
+        'message': 'Personal Finance API is running',
+        'timestamp': datetime.utcnow().isoformat(),
+        'checks': {
+            'api': 'ok',
+            'database': 'unknown'
+        }
+    }
+    
+    # Check database connectivity
+    try:
+        # Execute a simple query to verify database connection
+        db.session.execute(text('SELECT 1'))
+        health_status['checks']['database'] = 'ok'
+    except Exception as e:
+        health_status['status'] = 'unhealthy'
+        health_status['checks']['database'] = 'failed'
+        health_status['error'] = str(e)
+        app_logger.error(f"Database health check failed: {str(e)}")
+        return health_status, 503
+    
+    return health_status, 200
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))

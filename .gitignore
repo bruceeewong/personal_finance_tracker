@@ -140,4 +140,5 @@ pids/
 # Temporary files
 temp/
 tmp/
-*.tmp
+*.tmp.env.local
+.env.production

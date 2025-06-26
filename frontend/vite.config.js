@@ -17,12 +17,12 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 3000,
+    port: parseInt(process.env.PORT || '5100'),
     proxy: {
       '/api': {
-        target: 'http://100.97.49.122:5001',
+        target: process.env.VITE_API_URL || 'http://localhost:5101',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     }
   }

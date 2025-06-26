@@ -1,8 +1,11 @@
 import axios from 'axios';
 
+// Get API URL from environment variable or use default
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: 'http://100.97.49.122:5001/api',
+  baseURL: `${API_BASE_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -34,7 +37,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
-          const response = await axios.post('http://100.97.49.122:5001/api/auth/refresh', {}, {
+          const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {}, {
             headers: {
               Authorization: `Bearer ${refreshToken}`,
             },
