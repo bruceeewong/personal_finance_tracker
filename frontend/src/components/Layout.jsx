@@ -25,6 +25,7 @@ import {
   User,
   DollarSign,
 } from 'lucide-react';
+import { getNavigationButtonClass, getUserInfoClasses, getContainerClass } from '../utils/styleUtils';
 
 const Layout = () => {
   const { user, logout } = useAuth();
@@ -58,7 +59,7 @@ const Layout = () => {
   };
 
   const NavigationContent = ({ isMobile = false }) => (
-    <nav className={`${isMobile ? 'flex flex-col space-y-2' : 'space-y-1'}`}>
+    <nav className={`${isMobile ? 'flex flex-col space-y-1' : 'space-y-1'}`}>
       {navigationItems.map((item) => {
         const Icon = item.icon;
         const isActive = location.pathname === item.path;
@@ -67,13 +68,11 @@ const Layout = () => {
           <Button
             key={item.path}
             variant={isActive ? 'default' : 'ghost'}
-            className={`${isMobile ? 'w-full justify-start' : 'w-full justify-start'} ${
-              isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
-            }`}
+            className={getNavigationButtonClass(isActive, isMobile)}
             onClick={() => handleNavigation(item.path)}
           >
             <Icon className="mr-3 h-4 w-4" />
-            {item.label}
+            <span>{item.label}</span>
           </Button>
         );
       })}
@@ -92,13 +91,56 @@ const Layout = () => {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-64">
-                <div className="flex flex-col h-full">
-                  <div className="flex items-center space-x-2 mb-6">
-                    <DollarSign className="h-6 w-6 text-primary" />
-                    <span className="text-lg font-semibold">Personal Finance</span>
+              <SheetContent side="left" className="w-64 p-0">
+                <div className={getContainerClass('drawer', 'mobile')}>
+                  {/* Header */}
+                  <div className={getContainerClass('header', 'mobile')}>
+                    <DollarSign className="h-6 w-6 text-blue-600" />
+                    <span className="text-lg font-semibold text-gray-900">Personal Finance</span>
                   </div>
-                  <NavigationContent isMobile={true} />
+                  
+                  {/* Navigation - Scrollable middle section */}
+                  <div className={getContainerClass('navigation', 'mobile')}>
+                    <NavigationContent isMobile={true} />
+                  </div>
+                  
+                  {/* User Profile - Always visible at bottom */}
+                  <div className={getContainerClass('userSection', 'mobile')}>
+                    {/* User Info */}
+                    <div className="flex items-center px-3">
+                      <Avatar className="h-8 w-8 mr-3">
+                        <AvatarFallback className={getUserInfoClasses().avatar}>{getUserInitials()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span className={getUserInfoClasses().name}>
+                          {user?.first_name} {user?.last_name}
+                        </span>
+                        <span className={getUserInfoClasses().email}>
+                          {user?.email}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="space-y-1">
+                      <Button 
+                        variant="ghost" 
+                        className={`w-full justify-start h-9 ${getUserInfoClasses().profile}`}
+                        onClick={() => handleNavigation('/settings')}
+                      >
+                        <User className="mr-3 h-4 w-4" />
+                        Profile
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className={`w-full justify-start h-9 ${getUserInfoClasses().logout}`}
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="mr-3 h-4 w-4" />
+                        Log out
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
@@ -116,13 +158,13 @@ const Layout = () => {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuContent className="w-56" align="end">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">
+                  <p className="text-sm font-medium leading-none text-gray-900">
                     {user?.first_name} {user?.last_name}
                   </p>
-                  <p className="text-xs leading-none text-muted-foreground">
+                  <p className="text-xs leading-none text-gray-600">
                     {user?.email}
                   </p>
                 </div>
@@ -144,48 +186,58 @@ const Layout = () => {
       <div className="flex">
         {/* Desktop Sidebar */}
         <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:bg-card">
-          <div className="flex flex-col flex-1 min-h-0">
-            <div className="flex items-center h-16 px-6 border-b">
+          <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="flex items-center h-16 px-6 border-b flex-shrink-0">
               <div className="flex items-center space-x-2">
                 <DollarSign className="h-6 w-6 text-primary" />
                 <span className="text-lg font-semibold">Personal Finance</span>
               </div>
             </div>
             
-            <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+            {/* Navigation - Scrollable middle section */}
+            <div className="flex-1 overflow-y-auto pt-5 pb-4">
               <div className="px-3">
                 <NavigationContent />
               </div>
             </div>
             
-            <div className="flex-shrink-0 border-t p-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="w-full justify-start">
-                    <Avatar className="h-6 w-6 mr-3">
-                      <AvatarFallback className="text-xs">{getUserInitials()}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm font-medium">
-                        {user?.first_name} {user?.last_name}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {user?.email}
-                      </span>
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuItem onClick={() => handleNavigation('/settings')}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            {/* User Profile - Always visible at bottom */}
+            <div className="flex-shrink-0 border-t p-4 space-y-3">
+              {/* User Info */}
+              <div className="flex items-center px-3">
+                <Avatar className="h-8 w-8 mr-3">
+                  <AvatarFallback className="text-xs">{getUserInitials()}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-sm font-medium truncate">
+                    {user?.first_name} {user?.last_name}
+                  </span>
+                  <span className="text-xs text-muted-foreground truncate">
+                    {user?.email}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="space-y-1">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start h-9"
+                  onClick={() => handleNavigation('/settings')}
+                >
+                  <User className="mr-3 h-4 w-4" />
+                  Profile
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start h-9 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="mr-3 h-4 w-4" />
+                  Log out
+                </Button>
+              </div>
             </div>
           </div>
         </aside>

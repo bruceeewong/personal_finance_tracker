@@ -1,17 +1,18 @@
 # Next Tasks & Improvements
 
-## Immediate Testing 🧪
+## 🔄 IMPORTANT WORKFLOW RULE
+**When completing any feature/task, ALWAYS follow this 3-step process:**
+1. Cross out the completed item in this todo list (change [ ] to [x])
+2. Git commit with clear, descriptive message
+3. Submit a PR to origin with proper description
 
-### 1. Verify JWT Fix
-- [ ] Test login functionality with new string-based JWT tokens
-- [ ] Verify `/auth/me` endpoint works correctly  
-- [ ] Confirm user remains logged in without redirect loops
-- [ ] Check that dashboard loads properly after login
-
-### 2. Review Log Output
-- [ ] Check `backend/logs/api.log` for clean request/response flow
-- [ ] Verify JWT operations show successful creation and validation
-- [ ] Ensure no error logs appear during normal authentication flow
+## Completed Tasks ✅
+- [x] Update Dashboard to show real account balances instead of mock data (2025-06-22)
+- [x] Implement comprehensive TransactionsPage with full CRUD functionality (2025-06-22)
+- [x] Complete transaction feature implementation (backend + frontend) (2025-06-22)
+- [x] Implement transaction frontend with full CRUD, filtering, and monthly summaries (2025-06-24)
+- [x] Fix transaction summary API to show real data instead of zeros (2025-06-24)
+- [x] Fix transaction amount handling bug for expense categories (2025-06-24)
 
 ## Pending Development Tasks 🔧
 
@@ -24,6 +25,12 @@
 
 ### API Development
 - [ ] Implement remaining CRUD operations for accounts, transactions, etc.
+- [ ] **Budget API Endpoints**
+  - [ ] Create budget tables (budgets, budget_categories, budget_goals)
+  - [ ] CRUD endpoints for budget management
+  - [ ] Budget category allocation endpoints
+  - [ ] Goal tracking and contribution endpoints
+  - [ ] Budget analytics and summary endpoints
 - [ ] Add input validation middleware
 - [ ] Implement proper error handling for all endpoints
 - [ ] Add API documentation (Swagger/OpenAPI)
@@ -31,6 +38,15 @@
 
 ### Frontend Development  
 - [ ] Complete all page implementations (currently showing placeholders)
+  - [ ] **BudgetsPage** - Implement comprehensive budget management
+    - [ ] Monthly category budgets with spending limits
+    - [ ] Goal-based budgets (travel, savings)
+    - [ ] Budget progress tracking and visualizations
+    - [ ] Budget templates and copying
+    - [ ] Alert configuration
+  - [ ] InvestmentsPage - Portfolio tracking
+  - [ ] GoalsPage - Financial goals management
+  - [ ] SettingsPage - User preferences
 - [ ] Add form validation for all user inputs
 - [ ] Implement proper error boundaries
 - [ ] Add loading states and skeletons
