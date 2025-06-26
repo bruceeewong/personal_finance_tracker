@@ -62,14 +62,9 @@ if os.getenv('FLASK_ENV') == 'development':
          allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 else:
-    # For production, use specific origins
-    cors_origins_str = os.getenv('CORS_ORIGINS', 'http://localhost:3000')
-    cors_origins = [origin.strip() for origin in cors_origins_str.split(',')]
-    CORS(app, 
-         origins=cors_origins, 
-         supports_credentials=True,
-         allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
-         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+    # For production with nginx proxy, no CORS needed (same origin)
+    # CORS is disabled since nginx proxy serves both frontend and backend from same origin
+    pass
 
 # Register blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')

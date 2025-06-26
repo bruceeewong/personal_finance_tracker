@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-// Get API URL from environment variable or use default
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+// Always use relative URLs for same-origin requests via nginx proxy
+// This works with any host/IP (localhost, private IP, domain, etc.)
+const API_BASE_URL = '';
 
 // Create axios instance with base configuration
 const api = axios.create({
